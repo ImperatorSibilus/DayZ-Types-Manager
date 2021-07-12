@@ -162,27 +162,27 @@ public class ItemClass {
 		
 		Object[] returnObjects = new Object[19];
 		
-		returnObjects[1] = name;
-		if (nominal != -2) returnObjects[2] = nominal;
-		if (lifetime != -2) returnObjects[3] = lifetime;
-		if (restock != -2) returnObjects[4] = restock;
-		if (min != -2) returnObjects[5] = min;
-		if (quantmin != -2) returnObjects[6] = quantmin;
-		if (quantmax != -2) returnObjects[7] = quantmax;
-		if (cost != -2) returnObjects[8] = cost;
+		returnObjects[Column.NAME] = name;
+		if (nominal != -2) returnObjects[Column.NOMINAL] = nominal;
+		if (lifetime != -2) returnObjects[Column.LIFETIME] = lifetime;
+		if (restock != -2) returnObjects[Column.RESTOCK] = restock;
+		if (min != -2) returnObjects[Column.MIN] = min;
+		if (quantmin != -2) returnObjects[Column.QUANTMIN] = quantmin;
+		if (quantmax != -2) returnObjects[Column.QUANTMAX] = quantmax;
+		if (cost != -2) returnObjects[Column.COST] = cost;
 		
 		if (flags != null) {
 			for (int i = 0; i<flags.length; i++) {
-				returnObjects[9+i] = flags[i];
+				returnObjects[Column.COUNTINCARGO+i] = flags[i];
 			}
 		} else {
 			for (int i = 0; i<6; i++) {
-				returnObjects[9+i] = false;
+				returnObjects[Column.COUNTINCARGO+i] = false;
 			}
 		}
 		
-		returnObjects[15] = category;
-		returnObjects[16] = tag;
+		returnObjects[Column.CATEGORY] = category;
+		returnObjects[Column.TAG] = tag;
 		
 		if (usage.size() > 0) {
 			String usageString = usage.get(0);
@@ -192,7 +192,7 @@ public class ItemClass {
 					usageString = usageString + ", " + singleUsage;
 				}
 			}
-			returnObjects[17] = usageString;
+			returnObjects[Column.USAGE] = usageString;
 		}
 		
 		if (value.size() > 0) {
@@ -203,7 +203,7 @@ public class ItemClass {
 					valueString = valueString + ", " + singleValue;
 				}
 			}
-			returnObjects[18] = valueString;
+			returnObjects[Column.VALUE] = valueString;
 		}
 		
 		return returnObjects;
