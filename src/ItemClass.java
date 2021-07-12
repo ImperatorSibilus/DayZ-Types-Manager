@@ -186,7 +186,8 @@ public class ItemClass {
 		
 		if (usage.size() > 0) {
 			String usageString = usage.get(0);
-			for (String singleUsage: usage) {
+			for (int i = 0; i<usage.size(); i++) {
+				String singleUsage = usage.get(i);
 				if (singleUsage != null)
 				{
 					usageString = usageString + ", " + singleUsage;
@@ -197,7 +198,8 @@ public class ItemClass {
 		
 		if (value.size() > 0) {
 			String valueString = value.get(0);
-			for (String singleValue: value) {
+			for (int i = 0; i<value.size(); i++) {
+				String singleValue = value.get(i);
 				if (singleValue != null)
 				{
 					valueString = valueString + ", " + singleValue;
