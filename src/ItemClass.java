@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 public class ItemClass {
 	
+	public int index;
 	private String name;
 	public int nominal;
 	public int lifetime;
@@ -18,7 +19,9 @@ public class ItemClass {
 	public List<String> usage = new ArrayList<String>();
 	public List<String> value = new ArrayList<String>();
 	
-	public ItemClass(String code) {
+	public ItemClass(String code, int index) {
+		
+		this.index = index;
 		
 		Pattern pattern = Pattern.compile("[^\\n]*<type name=\"(\\S*)\">[\\s\\S]*?\\s*<\\/type>");
 		Matcher matcher = pattern.matcher(code);
@@ -162,6 +165,7 @@ public class ItemClass {
 		
 		Object[] returnObjects = new Object[19];
 		
+		returnObjects[Column.ID] = index;
 		returnObjects[Column.NAME] = name;
 		if (nominal != -2) returnObjects[Column.NOMINAL] = nominal;
 		if (lifetime != -2) returnObjects[Column.LIFETIME] = lifetime;

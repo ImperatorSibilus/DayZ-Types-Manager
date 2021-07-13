@@ -21,6 +21,23 @@ import javax.swing.JScrollPane;
 import java.awt.Dimension;
 import javax.swing.ScrollPaneConstants;
 import java.awt.Cursor;
+import javax.swing.JList;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.AbstractListModel;
+import javax.swing.UIManager;
+import java.awt.Choice;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 
 public class MainWindow {
 
@@ -28,7 +45,9 @@ public class MainWindow {
 	private File originalFile;
 	private String header;
 	private List<ItemClass> items = new ArrayList<ItemClass>();
+	private List<ItemClass> oldItems = new ArrayList<ItemClass>();
 	private JTable tbTypes;
+	private JComboBox cbCategoryFilter;
 
 	/**
 	 * Launch the application.
@@ -63,21 +82,21 @@ public class MainWindow {
 		frmTypesManager.setBounds(100, 100, 1200, 600);
 		frmTypesManager.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JButton btnOpen = new JButton("Open");
+		JButton btnOpen = new JButton("Open types.xml");
 		btnOpen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnOpenClick();
 			}
 		});
 		
-		JButton btnInsert = new JButton("Insert");
+		JButton btnInsert = new JButton("Insert types.xml");
 		btnInsert.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnInsertClick();
 			}
 		});
 		
-		JButton btnSave = new JButton("Save");
+		JButton btnSave = new JButton("Save to File");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnSaveClick();
@@ -155,31 +174,87 @@ public class MainWindow {
 		tbTypes.getColumnModel().getColumn(Column.VALUE).setPreferredWidth(150);
 		tbTypes.getColumnModel().getColumn(Column.VALUE).setMinWidth(150);
 		spTypesTable.setViewportView(tbTypes);
+		
+		JButton btnReset = new JButton("Reset to last temporary Save");
+		btnReset.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnResetToLastSave();
+			}
+		});
+		
+		JButton btnTemporarySave = new JButton("Temporary Save");
+		btnTemporarySave.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnTempSave();
+			}
+		});
+		
+		cbCategoryFilter = new JComboBox();
+		cbCategoryFilter.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				btnFilterCategory();
+			}
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+			}
+		});
+		cbCategoryFilter.setModel(new DefaultComboBoxModel(new String[] {"Select a Category to filter by", "weapons", "food", "tools", "clothes", "vehiclesparts", "explosives", "containers"}));
+		
+		JButton btnFullReset = new JButton("Full Reset");
+		btnFullReset.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				btnFullReset();
+			}
+		});
 		GroupLayout groupLayout = new GroupLayout(frmTypesManager.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGap(10)
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(spTypesTable, GroupLayout.DEFAULT_SIZE, 1164, Short.MAX_VALUE)
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+							.addGap(6)
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+								.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(btnInsert, GroupLayout.PREFERRED_SIZE, 159, GroupLayout.PREFERRED_SIZE)
+									.addGap(10)
+									.addComponent(btnReset, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+								.addGroup(groupLayout.createSequentialGroup()
+									.addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, 159, GroupLayout.PREFERRED_SIZE)
+									.addGap(10)
+									.addComponent(btnTemporarySave, GroupLayout.PREFERRED_SIZE, 213, GroupLayout.PREFERRED_SIZE)))
 							.addGap(10)
-							.addComponent(btnInsert, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-							.addGap(10)
-							.addComponent(btnSave, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
-						.addComponent(spTypesTable, GroupLayout.DEFAULT_SIZE, 1164, Short.MAX_VALUE))
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(btnFullReset, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(btnSave, GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
+							.addPreferredGap(ComponentPlacement.RELATED, 416, Short.MAX_VALUE)
+							.addComponent(cbCategoryFilter, GroupLayout.PREFERRED_SIZE, 175, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)))
 					.addGap(10))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(11)
+					.addGap(14)
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnInsert, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnSave, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
+						.addComponent(btnOpen)
+						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+							.addComponent(btnTemporarySave)
+							.addComponent(btnSave)
+							.addComponent(cbCategoryFilter, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)))
+					.addGap(6)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(btnInsert)
+						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+							.addComponent(btnReset)
+							.addComponent(btnFullReset)))
 					.addGap(11)
-					.addComponent(spTypesTable, GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
+					.addComponent(spTypesTable, GroupLayout.DEFAULT_SIZE, 473, Short.MAX_VALUE)
 					.addGap(11))
 		);
 		frmTypesManager.getContentPane().setLayout(groupLayout);
@@ -188,6 +263,7 @@ public class MainWindow {
 	private void btnOpenClick() {
 		clearTable();
 		items = new ArrayList<ItemClass>();
+		oldItems = new ArrayList<ItemClass>(); 
 		
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -198,11 +274,16 @@ public class MainWindow {
 				String text = open(originalFile);
 				header = getHeader(text);
 				List<String> itemsInText = searchForItems(text);
-				items = new ArrayList<ItemClass>(); 
 				for (int i=0; i<itemsInText.size(); i++) {
-					items.add(new ItemClass(itemsInText.get(i)));
+					items.add(new ItemClass(itemsInText.get(i), i+1));
+					oldItems.add(new ItemClass(itemsInText.get(i), i+1));
 				}
-				addToTable(items);
+				String filter = cbCategoryFilter.getSelectedItem().toString();
+				if (filter.equals("Select a Category to filter by")) {
+					addToTable(items);
+				} else {
+					addToTable(filterByCategory(filter));
+				}
 			} catch (IOException e1) {
 				System.out.println("Faggot!");
 			}
@@ -219,7 +300,7 @@ public class MainWindow {
 				List<String> itemsInText = new ArrayList<String>(searchForItems(text));
 				List<ItemClass> newItems = new ArrayList<ItemClass>();
 				for (int i=0; i<itemsInText.size(); i++) {
-					newItems.add(new ItemClass(itemsInText.get(i)));
+					newItems.add(new ItemClass(itemsInText.get(i), i));
 				}
 				String attentionText = "";
 				int matchIndex = -1;
@@ -231,12 +312,24 @@ public class MainWindow {
 							matchIndex = newMatchIndex;
 						} else {
 							attentionText = attentionText + newItem.getName() + "\n";
-							items.add(matchIndex+1, newItem);
-							DefaultTableModel model = (DefaultTableModel)tbTypes.getModel();
-							Object[] newRow = newItem.exportContentsForTable();
-							newRow[Column.ID] = i+1;
-							model.insertRow(matchIndex+1, newRow);
-							updateIndex(i+1);
+							newItem.index = matchIndex+1;
+							items.add(newItem.index, newItem);
+							String filter = cbCategoryFilter.getSelectedItem().toString(); 
+							if (filter.equals("Select a Category to filter by")) {
+								DefaultTableModel model = (DefaultTableModel)tbTypes.getModel();
+								Object[] newRow = newItem.exportContentsForTable();
+								newRow[Column.ID] = newItem.index;
+								model.insertRow(newItem.index, newRow);
+								updateIndex(i+1);
+							} else {
+								if (filter.equals(newItem.category)) {
+									DefaultTableModel model = (DefaultTableModel)tbTypes.getModel();
+									Object[] newRow = newItem.exportContentsForTable();
+									newRow[Column.ID] = newItem.index;
+									model.insertRow(newItem.index, newRow);
+									updateIndex(i+1);
+								}
+							}
 						}
 					}
 				}
@@ -272,6 +365,43 @@ public class MainWindow {
 	            System.out.println("Faggot!");
 	        }
 		}
+	}
+	
+	private void btnFilterCategory() {
+		saveFromTable();
+		clearTable();
+		String filter = cbCategoryFilter.getSelectedItem().toString();
+		if (filter.equals("Select a Category to filter by")) {
+			addToTable(items);
+		} else {
+			addToTable(filterByCategory(filter));
+		}
+	}
+	
+	private void btnResetToLastSave() {
+		clearTable();
+		addToTable(items);
+	}
+	
+	private void btnTempSave() {
+		saveFromTable();
+	}
+
+	private void btnFullReset() {
+		clearTable();
+		addToTable(oldItems);
+	}
+	
+	private List<ItemClass> filterByCategory(String filter){
+		List<ItemClass> filteredItems = new ArrayList<ItemClass>();
+		if (items != null) {
+			for (int i = 0; i<items.size(); i++) {
+				if (items.get(i) != null && items.get(i).category != null && items.get(i).category.equals(filter)) {
+					filteredItems.add(items.get(i));
+				}
+			}
+		}
+		return filteredItems;
 	}
 	
 	private int searchForMatch(String name) {
@@ -317,7 +447,6 @@ public class MainWindow {
 		for (int i = 0; i<newItems.size(); i++) {
 			if (newItems.get(i) != null) {
 				Object[] newRow = newItems.get(i).exportContentsForTable();
-				newRow[Column.ID] = i+1;
 				model.addRow(newRow);
 			}
 		}
@@ -372,10 +501,9 @@ public class MainWindow {
 			
 			if (model.getValueAt(row, Column.USAGE) != null){
 				tempItem.usage = new ArrayList<String>();
-				String[] usageArray = model.getValueAt(row, Column.USAGE).toString().split(",");
+				String[] usageArray = model.getValueAt(row, Column.USAGE).toString().split(", ");
 				for (String singleUsage: usageArray) {
-					singleUsage.trim();
-					tempItem.usage.add(singleUsage);
+					tempItem.usage.add(singleUsage.trim());
 				}
 			}
 			
@@ -383,8 +511,7 @@ public class MainWindow {
 				tempItem.value = new ArrayList<String>();
 				String[] valueArray = model.getValueAt(row, Column.VALUE).toString().split(", ");
 				for (String singleValue: valueArray) {
-					singleValue.trim();
-					tempItem.value.add(singleValue);
+					tempItem.value.add(singleValue.trim());
 				}
 			}
 		}
