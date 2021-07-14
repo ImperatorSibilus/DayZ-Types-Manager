@@ -312,20 +312,24 @@ public class MainWindow {
 							matchIndex = newMatchIndex;
 						} else {
 							attentionText = attentionText + newItem.getName() + "\n";
-							newItem.index = matchIndex+1;
+							if (matchIndex == -1) {
+								newItem.index = 1;
+								matchIndex = newItem.index;
+							} else {
+								newItem.index = matchIndex + 1;
+								matchIndex = newItem.index;
+							}
 							items.add(newItem.index, newItem);
 							String filter = cbCategoryFilter.getSelectedItem().toString(); 
 							if (filter.equals("Select a Category to filter by")) {
 								DefaultTableModel model = (DefaultTableModel)tbTypes.getModel();
 								Object[] newRow = newItem.exportContentsForTable();
-								newRow[Column.ID] = newItem.index;
 								model.insertRow(newItem.index, newRow);
 								updateIndex(i+1);
 							} else {
 								if (filter.equals(newItem.category)) {
 									DefaultTableModel model = (DefaultTableModel)tbTypes.getModel();
 									Object[] newRow = newItem.exportContentsForTable();
-									newRow[Column.ID] = newItem.index;
 									model.insertRow(newItem.index, newRow);
 									updateIndex(i+1);
 								}
